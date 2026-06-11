@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fraud Detection</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: linear-gradient(135deg, #020617 0%, #0f172a 60%, #0c1a2e 100%); font-family: 'Segoe UI', system-ui, sans-serif; color: #f1f5f9; padding: 40px 20px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    .badge { display: inline-block; background: #6366f122; color: #818cf8; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
+    h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 32px; }
+    .card { background: #0f172a99; border: 1px solid #1e293b; border-radius: 16px; padding: 28px 30px; margin-bottom: 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 11px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    input, select { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; color: #f1f5f9; font-size: 15px; outline: none; }
+    input:focus, select:focus { border-color: #6366f1; }
+    select option { background: #1e293b; }
+    .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+    .btn:hover { opacity: 0.9; }
+    .error-box { background: #ef444420; border: 1px solid #ef444455; border-radius: 8px; padding: 10px 16px; color: #fca5a5; font-size: 13px; margin-bottom: 16px; }
+    .section-title { font-size: 11px; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .result-card { border-radius: 14px; padding: 22px 24px; }
+    .result-card.fraud { background: #0f172a; border: 1px solid #ef444455; }
+    .result-card.normal { background: #0f172a; border: 1px solid #22c55e33; }
+    .model-name { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
+    .verdict { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+    .verdict.fraud { color: #ef4444; }
+    .verdict.normal { color: #22c55e; }
+    .verdict-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 5px; margin-left: 8px; vertical-align: middle; }
+    .verdict-badge.fraud { background: #ef444422; color: #ef4444; }
+    .verdict-badge.normal { background: #22c55e22; color: #22c55e; }
+    .prob-label { font-size: 12px; color: #94a3b8; margin: 12px 0 5px; }
+    .bar-track { background: #1e293b; border-radius: 6px; height: 10px; overflow: hidden; margin-bottom: 6px; }
+    .bar-fill { height: 100%; border-radius: 6px; }
+    .bar-high { background: #ef4444; } .bar-mid { background: #f59e0b; } .bar-low { background: #22c55e; }
+    .prob-val { font-size: 22px; font-weight: 700; }
+    .prob-val.high { color: #ef4444; } .prob-val.mid { color: #f59e0b; } .prob-val.low { color: #22c55e; }
+    .tip { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px 18px; font-size: 13px; color: #94a3b8; line-height: 1.7; }
+    .tip strong { color: #f1f5f9; }
+    .footer { text-align: center; margin-top: 40px; color: #334155; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="badge">AI Money Mule Detection</div>
+  <h1>Transaction Fraud Analyzer</h1>
+  <p class="subtitle">Enter transaction details. Logistic Regression and Naive Bayes models evaluate the fraud risk.</p>
+
+  <div class="card">
+    <form method="POST" action="/">
+      <div class="grid-2">
+        <div class="field">
+          <label>Transaction Type</label>
+          <select name="type">
+            <option value="TRANSFER">TRANSFER</option>
+            <option value="CASH_OUT">CASH_OUT</option>
+            <option value="CASH_IN">CASH_IN</option>
+            <option value="PAYMENT">PAYMENT</option>
+            <option value="DEBIT">DEBIT</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Amount (Rs)</label>
+          <input type="number" name="amount" placeholder="e.g. 342309" step="0.01" required />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Origin Old Balance</label>
+          <input type="number" name="oldbalanceOrg" placeholder="e.g. 342309" step="0.01" required />
+        </div>
+        <div class="field">
+          <label>Origin New Balance</label>
+          <input type="number" name="newbalanceOrig" placeholder="e.g. 0" step="0.01" required />
+        </div>
+      </div>
+      <button type="submit" class="btn">Analyze Transaction</button>
+    </form>
+  </div>
+
+  {% if error %}
+  <div class="error-box">Error: {{ error }}</div>
+  {% endif %}
+
+  {% if result %}
+  <div class="section-title">Analysis Results</div>
+  <div class="results-grid">
+    {% for key, name in [('lr','Logistic Regression'),('nb','Naive Bayes')] %}
+    {% set r = result[key] %}
+    {% set cls = 'fraud' if r.is_fraud else 'normal' %}
+    {% set bar_cls = 'bar-high' if r.prob > 70 else ('bar-mid' if r.prob > 40 else 'bar-low') %}
+    {% set val_cls = 'high' if r.prob > 70 else ('mid' if r.prob > 40 else 'low') %}
+    <div class="result-card {{ cls }}">
+      <div class="model-name">{{ name }}</div>
+      <div class="verdict {{ cls }}">{{ r.label }}<span class="verdict-badge {{ cls }}">{{ 'Alert' if r.is_fraud else 'Clear' }}</span></div>
+      <div class="prob-label">Fraud probability</div>
+      <div class="bar-track"><div class="bar-fill {{ bar_cls }}" style="width:{{ r.prob }}%"></div></div>
+      <div class="prob-val {{ val_cls }}">{{ r.prob }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="tip"><strong>Note:</strong> Logistic Regression (92.7% accuracy) is the more reliable model. Naive Bayes has low recall so may miss some fraud cases.</div>
+  {% endif %}
+
+  <div class="footer">PESU MCA - AIML Project - PaySim Dataset - Logistic Regression + Naive Bayes</div>
+</div>
+</body>
+</html>
