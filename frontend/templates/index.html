@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { min-height: 100vh; background: linear-gradient(135deg, #020617 0%, #0f172a 60%, #0c1a2e 100%); font-family: 'Segoe UI', system-ui, sans-serif; color: #f1f5f9; padding: 40px 20px; }
-    .container { max-width: 760px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 0 auto; }
     .badge { display: inline-block; background: #6366f122; color: #818cf8; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
     h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
     .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
@@ -30,7 +30,9 @@
     .btn:hover { opacity: 0.9; }
     .error-box { background: #ef444420; border: 1px solid #ef444455; border-radius: 8px; padding: 10px 16px; color: #fca5a5; font-size: 13px; margin-bottom: 16px; }
     .section-title { font-size: 11px; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
-    .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .section-divider { font-size: 11px; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin: 20px 0 12px; border-top: 1px solid #1e293b; padding-top: 16px; }
+    .results-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; }
+    .results-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     .result-card { border-radius: 14px; padding: 22px 24px; }
     .result-card.fraud { background: #0f172a; border: 1px solid #ef444455; }
     .result-card.normal { background: #0f172a; border: 1px solid #22c55e33; }
@@ -47,13 +49,20 @@
     .bar-high { background: #ef4444; } .bar-mid { background: #f59e0b; } .bar-low { background: #22c55e; }
     .prob-val { font-size: 22px; font-weight: 700; }
     .prob-val.high { color: #ef4444; } .prob-val.mid { color: #f59e0b; } .prob-val.low { color: #22c55e; }
+    .tuning-section { background: #0f172a99; border: 1px solid #1e293b; border-radius: 16px; padding: 28px 30px; margin-top: 8px; }
+    .tuning-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 16px; }
+    .tuning-card { background: #0a0f1e; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
+    .tuning-model { font-size: 10px; color: #6366f1; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+    .tuning-params { font-size: 10px; color: #94a3b8; line-height: 1.6; margin-bottom: 8px; font-family: monospace; }
+    .tuning-f1 { font-size: 18px; font-weight: 800; color: #00d4ff; }
+    .tuning-f1-label { font-size: 10px; color: #64748b; margin-top: 2px; }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="badge">AI Money Mule Detection</div>
   <h1>Transaction Fraud Analyzer</h1>
-  <p class="subtitle">Enter transaction details or load a demo. Logistic Regression and Naive Bayes models evaluate the fraud risk.</p>
+  <p class="subtitle">Enter transaction details or load a demo. 5 ML models evaluate the fraud risk simultaneously.</p>
 
   <div class="demo-section">
     <div class="demo-label">Quick Demo Data</div>
@@ -102,8 +111,27 @@
 
   {% if result %}
   <div class="section-title">Analysis Results</div>
-  <div class="results-grid">
+
+  <div class="section-divider">Primary Models</div>
+  <div class="results-grid-2">
     {% for key, name in [('lr','Logistic Regression'),('nb','Naive Bayes')] %}
+    {% set r = result[key] %}
+    {% set cls = 'fraud' if r.is_fraud else 'normal' %}
+    {% set bar_cls = 'bar-high' if r.prob > 70 else ('bar-mid' if r.prob > 40 else 'bar-low') %}
+    {% set val_cls = 'high' if r.prob > 70 else ('mid' if r.prob > 40 else 'low') %}
+    <div class="result-card {{ cls }}">
+      <div class="model-name">{{ name }}</div>
+      <div class="verdict {{ cls }}">{{ r.label }}<span class="verdict-badge {{ cls }}">{{ 'Alert' if r.is_fraud else 'Clear' }}</span></div>
+      <div class="prob-label">Fraud probability</div>
+      <div class="bar-track"><div class="bar-fill {{ bar_cls }}" style="width:{{ r.prob }}%"></div></div>
+      <div class="prob-val {{ val_cls }}">{{ r.prob }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section-divider">Additional Models</div>
+  <div class="results-grid-3">
+    {% for key, name in [('rf','Random Forest'),('xgb','XGBoost'),('svm','SVM')] %}
     {% set r = result[key] %}
     {% set cls = 'fraud' if r.is_fraud else 'normal' %}
     {% set bar_cls = 'bar-high' if r.prob > 70 else ('bar-mid' if r.prob > 40 else 'bar-low') %}
@@ -119,13 +147,29 @@
   </div>
   {% endif %}
 
+  {% if tuning %}
+  <div class="tuning-section">
+    <div class="section-title">Hyperparameter Tuning Results</div>
+    <p style="font-size:12px; color:#64748b; margin-top:4px;">GridSearchCV with 5-fold cross-validation — best parameters for each model</p>
+    <div class="tuning-grid">
+      {% for key, name in [('lr','Logistic Regression'),('nb','Naive Bayes'),('rf','Random Forest'),('xgb','XGBoost'),('svm','SVM')] %}
+      {% set t = tuning[key] %}
+      <div class="tuning-card">
+        <div class="tuning-model">{{ name }}</div>
+        <div class="tuning-params">{{ t.params }}</div>
+        <div class="tuning-f1">{{ t.f1 }}</div>
+        <div class="tuning-f1-label">Best F1 Score</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
 </div>
 <script>
   const demos = {
     fraud1: { type: 'TRANSFER', amount: 342309, old: 342309, new: 0 },
-    fraud2: { type: 'CASH_OUT', amount: 185000, old: 185000, new: 0 },
     normal1: { type: 'PAYMENT', amount: 1500, old: 50000, new: 48500 },
-    normal2: { type: 'CASH_IN', amount: 25000, old: 10000, new: 35000 },
   };
   function loadDemo(key) {
     const d = demos[key];
