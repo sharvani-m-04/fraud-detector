@@ -10,7 +10,15 @@
     .container { max-width: 760px; margin: 0 auto; }
     .badge { display: inline-block; background: #6366f122; color: #818cf8; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
     h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
-    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 32px; }
+    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+    .demo-section { margin-bottom: 20px; }
+    .demo-label { font-size: 11px; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .demo-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+    .demo-btn { padding: 8px 18px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .demo-btn.fraud { background: #ef444422; color: #ef4444; border: 1px solid #ef444455; }
+    .demo-btn.normal { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
+    .demo-btn.clear { background: #6366f122; color: #818cf8; border: 1px solid #6366f144; }
+    .demo-btn:hover { opacity: 0.8; }
     .card { background: #0f172a99; border: 1px solid #1e293b; border-radius: 16px; padding: 28px 30px; margin-bottom: 24px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .field { margin-bottom: 16px; }
@@ -39,8 +47,6 @@
     .bar-high { background: #ef4444; } .bar-mid { background: #f59e0b; } .bar-low { background: #22c55e; }
     .prob-val { font-size: 22px; font-weight: 700; }
     .prob-val.high { color: #ef4444; } .prob-val.mid { color: #f59e0b; } .prob-val.low { color: #22c55e; }
-    .tip { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px 18px; font-size: 13px; color: #94a3b8; line-height: 1.7; }
-    .tip strong { color: #f1f5f9; }
     .footer { text-align: center; margin-top: 40px; color: #334155; font-size: 12px; }
   </style>
 </head>
@@ -48,14 +54,25 @@
 <div class="container">
   <div class="badge">AI Money Mule Detection</div>
   <h1>Transaction Fraud Analyzer</h1>
-  <p class="subtitle">Enter transaction details. Logistic Regression and Naive Bayes models evaluate the fraud risk.</p>
+  <p class="subtitle">Enter transaction details or load a demo. Logistic Regression and Naive Bayes models evaluate the fraud risk.</p>
+
+  <div class="demo-section">
+    <div class="demo-label">Quick Demo Data</div>
+    <div class="demo-buttons">
+      <button class="demo-btn fraud" onclick="loadDemo('fraud1')">Fraud Sample 1</button>
+      <button class="demo-btn fraud" onclick="loadDemo('fraud2')">Fraud Sample 2</button>
+      <button class="demo-btn normal" onclick="loadDemo('normal1')">Normal Sample 1</button>
+      <button class="demo-btn normal" onclick="loadDemo('normal2')">Normal Sample 2</button>
+      <button class="demo-btn clear" onclick="clearForm()">Clear</button>
+    </div>
+  </div>
 
   <div class="card">
-    <form method="POST" action="/">
+    <form method="POST" action="/" id="mainForm">
       <div class="grid-2">
         <div class="field">
           <label>Transaction Type</label>
-          <select name="type">
+          <select name="type" id="f_type">
             <option value="TRANSFER">TRANSFER</option>
             <option value="CASH_OUT">CASH_OUT</option>
             <option value="CASH_IN">CASH_IN</option>
@@ -65,17 +82,17 @@
         </div>
         <div class="field">
           <label>Amount (Rs)</label>
-          <input type="number" name="amount" placeholder="e.g. 342309" step="0.01" required />
+          <input type="number" name="amount" id="f_amount" placeholder="e.g. 342309" step="0.01" required />
         </div>
       </div>
       <div class="grid-2">
         <div class="field">
           <label>Origin Old Balance</label>
-          <input type="number" name="oldbalanceOrg" placeholder="e.g. 342309" step="0.01" required />
+          <input type="number" name="oldbalanceOrg" id="f_old" placeholder="e.g. 342309" step="0.01" required />
         </div>
         <div class="field">
           <label>Origin New Balance</label>
-          <input type="number" name="newbalanceOrig" placeholder="e.g. 0" step="0.01" required />
+          <input type="number" name="newbalanceOrig" id="f_new" placeholder="e.g. 0" step="0.01" required />
         </div>
       </div>
       <button type="submit" class="btn">Analyze Transaction</button>
@@ -103,10 +120,31 @@
     </div>
     {% endfor %}
   </div>
-  <div class="tip"><strong>Note:</strong> Logistic Regression (92.7% accuracy) is the more reliable model. Naive Bayes has low recall so may miss some fraud cases.</div>
   {% endif %}
 
   <div class="footer">PESU MCA - AIML Project - PaySim Dataset - Logistic Regression + Naive Bayes</div>
 </div>
+
+<script>
+  const demos = {
+    fraud1: { type: 'TRANSFER', amount: 342309, old: 342309, new: 0 },
+    fraud2: { type: 'CASH_OUT', amount: 185000, old: 185000, new: 0 },
+    normal1: { type: 'PAYMENT', amount: 1500, old: 50000, new: 48500 },
+    normal2: { type: 'CASH_IN', amount: 25000, old: 10000, new: 35000 },
+  };
+  function loadDemo(key) {
+    const d = demos[key];
+    document.getElementById('f_type').value = d.type;
+    document.getElementById('f_amount').value = d.amount;
+    document.getElementById('f_old').value = d.old;
+    document.getElementById('f_new').value = d.new;
+  }
+  function clearForm() {
+    document.getElementById('f_type').value = 'TRANSFER';
+    document.getElementById('f_amount').value = '';
+    document.getElementById('f_old').value = '';
+    document.getElementById('f_new').value = '';
+  }
+</script>
 </body>
 </html>
