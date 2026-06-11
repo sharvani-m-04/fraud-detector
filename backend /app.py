@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 import joblib, json, numpy as np, os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../frontend/templates')
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 lr_model = joblib.load(os.path.join(BASE, 'lr_model.pkl'))
@@ -43,4 +43,5 @@ def index():
     return render_template('index.html', result=result, error=error, form=form)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
