@@ -14,13 +14,14 @@ with open(os.path.join(BASE, 'feature_columns.json')) as f:
     feature_columns = json.load(f)
 
 ALL_TYPES = ['CASH_IN', 'CASH_OUT', 'DEBIT', 'PAYMENT', 'TRANSFER']
+TYPE_MAP  = {'CASH_IN': 0, 'CASH_OUT': 1, 'DEBIT': 2, 'PAYMENT': 3, 'TRANSFER': 4}
 
 TUNING_RESULTS = {
-    'lr':  {'params': 'C=10, solver=lbfgs',                          'f1': '0.885'},
-    'nb':  {'params': 'var_smoothing=1e-9',                           'f1': '0.501'},
-    'rf':  {'params': 'max_depth=10, n_estimators=100',               'f1': '0.992'},
+    'lr':  {'params': 'C=10, solver=lbfgs',                              'f1': '0.885'},
+    'nb':  {'params': 'var_smoothing=1e-9',                               'f1': '0.501'},
+    'rf':  {'params': 'max_depth=10, n_estimators=100',                   'f1': '0.992'},
     'xgb': {'params': 'learning_rate=0.3, max_depth=5, n_estimators=100', 'f1': '0.993'},
-    'svm': {'params': 'C=1, kernel=rbf',                              'f1': '0.884'},
+    'svm': {'params': 'C=1, kernel=rbf',                                  'f1': '0.884'},
 }
 
 @app.route('/', methods=['GET', 'POST'])
@@ -32,27 +33,33 @@ def index():
         try:
             form = request.form.to_dict()
             tx_type = form.get('type', 'TRANSFER')
-            row = {
-                'amount':         float(form['amount']),
-                'oldbalanceOrg':  float(form['oldbalanceOrg']),
-                'newbalanceOrig': float(form['newbalanceOrig']),
-            }
+            amount      = float(form['amount'])
+            old_balance = float(form['oldbalanceOrg'])
+            new_balance = float(form['newbalanceOrig'])
+
+            # 8-feature input for LR and NB (one-hot encoded)
+            row = {'amount': amount, 'oldbalanceOrg': old_balance, 'newbalanceOrig': new_balance}
             for t in ALL_TYPES:
                 row[f'type_{t}'] = 1 if tx_type == t else 0
-            X        = np.array([[row[c] for c in feature_columns]])
-            X_scaled = scaler.transform(X)
+            X8        = np.array([[row[c] for c in feature_columns]])
+            X8_scaled = scaler.transform(X8)
 
-            def predict(model):
-                pred = int(model.predict(X_scaled)[0])
-                prob = round(float(model.predict_proba(X_scaled)[0][1]) * 100, 2)
+            # 4-feature input for RF, XGB, SVM (label encoded)
+            type_encoded = TYPE_MAP.get(tx_type, 4)
+            X4        = np.array([[type_encoded, amount, old_balance, new_balance]])
+            X4_scaled = scaler.transform(X8)[:, :4]
+
+            def predict(model, X):
+                pred = int(model.predict(X)[0])
+                prob = round(float(model.predict_proba(X)[0][1]) * 100, 2)
                 return {'label': 'FRAUD' if pred == 1 else 'NORMAL', 'prob': prob, 'is_fraud': pred == 1}
 
             result = {
-                'lr':  predict(lr_model),
-                'nb':  predict(nb_model),
-                'rf':  predict(rf_model),
-                'xgb': predict(xgb_model),
-                'svm': predict(svm_model),
+                'lr':  predict(lr_model,  X8_scaled),
+                'nb':  predict(nb_model,  X8_scaled),
+                'rf':  predict(rf_model,  X4_scaled),
+                'xgb': predict(xgb_model, X4_scaled),
+                'svm': predict(svm_model, X4_scaled),
             }
         except Exception as e:
             error = str(e)
