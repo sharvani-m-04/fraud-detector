@@ -6,58 +6,45 @@
   <title>Fraud Guard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { min-height: 100vh; background: #f0f4f8; font-family: 'Segoe UI', system-ui, sans-serif; color: #1e293b; }
-
-    .header { background: linear-gradient(135deg, #1a3c6e, #2563eb); padding: 24px 20px 40px; max-width: 100%; }
+    body { background: #f0f4f8; font-family: 'Segoe UI', system-ui, sans-serif; color: #1e293b; }
+    .header { background: linear-gradient(135deg, #1a3c6e, #2563eb); padding: 24px 20px 40px; }
     .header-badge { font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
     .header-title { font-size: 24px; font-weight: 800; color: #fff; }
     .header-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 2px; }
     .demo-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
     .demo-chip { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 6px 16px; font-size: 12px; color: #fff; cursor: pointer; }
     .demo-chip:hover { background: rgba(255,255,255,0.25); }
-    .demo-chip.clear { background: rgba(255,255,255,0.08); }
-
-    .content { margin: -20px auto 0; max-width: 640px; padding: 0 16px; }
-
+    .page { max-width: 640px; margin: -20px auto 0; padding: 0 16px 32px; }
     .card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 14px; }
-
-    .form-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 600px; margin: 0 auto; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; display: block; }
     .form-input { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #1e293b; outline: none; }
     .form-input:focus { border-color: #2563eb; }
     select.form-input option { background: #fff; }
-    .analyze-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a3c6e, #2563eb); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 14px; }
+    .analyze-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a3c6e, #2563eb); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
     .analyze-btn:hover { opacity: 0.92; }
-
     .error-box { background: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 10px 14px; color: #dc2626; font-size: 13px; margin-bottom: 14px; }
-
     .section-label { font-size: 11px; font-weight: 700; color: #1a3c6e; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
-
-    .risk-dial-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 14px; text-align: center; }
+    .risk-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 14px; text-align: center; }
     .risk-verdict-high { display: inline-block; background: #fef2f2; color: #dc2626; font-size: 13px; font-weight: 700; padding: 6px 20px; border-radius: 30px; border: 1px solid #fee2e2; margin-top: 8px; }
     .risk-verdict-low { display: inline-block; background: #f0fdf4; color: #16a34a; font-size: 13px; font-weight: 700; padding: 6px 20px; border-radius: 30px; border: 1px solid #dcfce7; margin-top: 8px; }
     .risk-sub { font-size: 12px; color: #64748b; margin-top: 6px; }
-
-    .model-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; }
-    .model-row:last-child { margin-bottom: 0; }
+    .mini-badges { display: flex; justify-content: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .mini-badge-fraud { background: #fee2e2; color: #dc2626; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+    .mini-badge-normal { background: #dcfce7; color: #16a34a; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+    .model-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+    .model-row:last-child { border-bottom: none; padding-bottom: 0; }
     .model-name { font-size: 13px; font-weight: 600; color: #1e293b; }
-    .model-prob { font-size: 12px; color: #64748b; }
-    .model-right { display: flex; align-items: center; gap: 8px; }
-    .badge-fraud { background: #fee2e2; color: #dc2626; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-    .badge-normal { background: #dcfce7; color: #16a34a; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-
-    .tuning-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px; }
+    .model-prob { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .badge-fraud { background: #fee2e2; color: #dc2626; font-size: 10px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+    .badge-normal { background: #dcfce7; color: #16a34a; font-size: 10px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
     .tuning-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
     .tuning-item { background: #f8fafc; border-radius: 10px; padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; }
-    .tuning-model-name { font-size: 9px; font-weight: 700; color: #1a3c6e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .tuning-model-name { font-size: 9px; font-weight: 700; color: #1a3c6e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
     .tuning-params { font-size: 9px; color: #64748b; margin-bottom: 6px; line-height: 1.4; }
     .tuning-f1-high { font-size: 16px; font-weight: 800; color: #16a34a; }
     .tuning-f1-low { font-size: 16px; font-weight: 800; color: #1a3c6e; }
     .tuning-f1-label { font-size: 9px; color: #94a3b8; margin-top: 2px; }
-
-    .mini-badges { display: flex; justify-content: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
-    .mini-badge-fraud { background: #fee2e2; color: #dc2626; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
-    .mini-badge-normal { background: #dcfce7; color: #16a34a; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -69,17 +56,16 @@
   <div class="demo-row">
     <button class="demo-chip" onclick="loadDemo('fraud')">⚠ Suspicious Transfer</button>
     <button class="demo-chip" onclick="loadDemo('normal')">✓ Regular Payment</button>
-    <button class="demo-chip clear" onclick="clearForm()">✕ Clear</button>
+    <button class="demo-chip" onclick="clearForm()">✕ Clear</button>
   </div>
 </div>
 
-<div class="content">
-
-  <div class="card" style="margin-top:0">
+<div class="page">
+  <div class="card">
     <form method="POST" action="/" id="mainForm">
-      <div class="form-grid">
+      <div class="form-row">
         <div>
-          <div class="form-label">Transaction Type</div>
+          <label class="form-label">Transaction Type</label>
           <select name="type" id="f_type" class="form-input">
             <option value="TRANSFER">TRANSFER</option>
             <option value="CASH_OUT">CASH_OUT</option>
@@ -89,15 +75,17 @@
           </select>
         </div>
         <div>
-          <div class="form-label">Amount (Rs)</div>
-          <input type="number" name="amount" id="f_amount" class="form-input" placeholder="e.g. 800000" step="0.01" required /
+          <label class="form-label">Amount (Rs)</label>
+          <input type="number" name="amount" id="f_amount" class="form-input" placeholder="e.g. 75000" step="0.01" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">Origin Old Balance</label>
+          <input type="number" name="oldbalanceOrg" id="f_old" class="form-input" placeholder="e.g. 800000" step="0.01" required />
         </div>
         <div>
-          <div class="form-label">Origin Old Balance</div>
-          <input type="number" name="oldbalanceOrg" id="f_old" class="form-input" placeholder="e.g. 800000" step="0.01" required /
-        </div>
-        <div>
-          <div class="form-label">Origin New Balance</div>
+          <label class="form-label">Origin New Balance</label>
           <input type="number" name="newbalanceOrig" id="f_new" class="form-input" placeholder="e.g. 725000" step="0.01" required />
         </div>
       </div>
@@ -114,7 +102,7 @@
   {% set risk_score = ((result.lr.prob + result.nb.prob + result.rf.prob + result.xgb.prob + result.svm.prob) / 5) | round(1) %}
   {% set is_high_risk = fraud_count >= 3 %}
 
-  <div class="risk-dial-card">
+  <div class="risk-card">
     <div class="section-label">Overall Risk Score</div>
     <svg width="200" height="110" viewBox="0 0 200 110" style="display:block;margin:0 auto">
       <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#f1f5f9" stroke-width="16" stroke-linecap="round"/>
@@ -131,14 +119,12 @@
       <text x="100" y="88" text-anchor="middle" fill="{{ '#dc2626' if is_high_risk else '#16a34a' }}" font-size="32" font-weight="800" font-family="Segoe UI">{{ risk_score }}</text>
       <text x="100" y="104" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="Segoe UI">/100 RISK INDEX</text>
     </svg>
-
     {% if is_high_risk %}
     <div class="risk-verdict-high">⚠ HIGH FRAUD RISK</div>
     {% else %}
     <div class="risk-verdict-low">✓ LOW FRAUD RISK</div>
     {% endif %}
     <div class="risk-sub">{{ fraud_count }} out of 5 models flagged this transaction as fraud</div>
-
     <div class="mini-badges">
       {% for key, name in [('lr','LR'),('nb','NB'),('rf','RF'),('xgb','XGB'),('svm','SVM')] %}
       {% if result[key].is_fraud %}
@@ -159,22 +145,20 @@
         <div class="model-name">{{ name }}</div>
         <div class="model-prob">Fraud probability: {{ r.prob }}%</div>
       </div>
-      <div class="model-right">
-        {% if r.is_fraud %}
-        <span class="badge-fraud">FRAUD</span>
-        {% else %}
-        <span class="badge-normal">NORMAL</span>
-        {% endif %}
-      </div>
+      {% if r.is_fraud %}
+      <span class="badge-fraud">FRAUD</span>
+      {% else %}
+      <span class="badge-normal">NORMAL</span>
+      {% endif %}
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
   {% if tuning %}
-  <div class="tuning-card">
+  <div class="card">
     <div class="section-label">Hyperparameter Tuning</div>
-    <div style="font-size:11px;color:#94a3b8">GridSearchCV · 5-fold cross-validation · Best params per model</div>
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:0">GridSearchCV · 5-fold cross-validation · Best params per model</div>
     <div class="tuning-grid">
       {% for key, name in [('lr','Logistic Reg.'),('nb','Naive Bayes'),('rf','Random Forest'),('xgb','XGBoost'),('svm','SVM')] %}
       {% set t = tuning[key] %}
@@ -192,7 +176,6 @@
     </div>
   </div>
   {% endif %}
-
 </div>
 
 <script>
